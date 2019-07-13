@@ -413,12 +413,12 @@ static void test_binarytree(void)
     }
     nPointsCount = nCurrentRowFirstPointIndex + nCurrentRowPointsCount;
 
-    /*{
+    {
         int i;
         for (i = 0; i < nPointsCount; i++)
             printf("Point %d: (%f, %f)\n", i,
                     am_value(arrX[i]), am_value(arrY[i]));
-    }*/
+    }
 
     am_delsolver(pSolver);
     printf("allmem = %d\n", (int)allmem);

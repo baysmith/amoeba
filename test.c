@@ -416,8 +416,8 @@ static void test_binarytree(void)
     {
         int i;
         for (i = 0; i < nPointsCount; i++)
-            printf("Point %d: (%f, %f)\n", i,
-                    am_value(arrX[i]), am_value(arrY[i]));
+            printf("Point %d: (%f, %f)\n", i, am_value(arrX[i]),
+                   am_value(arrY[i]));
     }
 
     am_delsolver(pSolver);
@@ -697,7 +697,25 @@ static void test_suggest(void)
     new_constraint(solver, AM_REQUIRED, splitter_r, 1.0, AM_EQUAL, width, END);
 
     printf("\n\n==========\ntest suggest\n");
-    for (pos = -10; pos < 86; pos++) {
+    for (pos = -10; pos < 56; pos++) {
+        am_suggest(splitter_bar_l, pos);
+        printf("pos: %4g | ", pos);
+        printf("splitter_l l=%2g, w=%2g, r=%2g | ", am_value(splitter_l),
+               am_value(splitter_w), am_value(splitter_r));
+        printf("left_child_l l=%2g, w=%2g, r=%2g | ", am_value(left_child_l),
+               am_value(left_child_w), am_value(left_child_r));
+        printf("splitter_bar_l l=%2g, w=%2g, r=%2g | ",
+               am_value(splitter_bar_l), am_value(splitter_bar_w),
+               am_value(splitter_bar_r));
+        printf("right_child_l l=%2g, w=%2g, r=%2g | ", am_value(right_child_l),
+               am_value(right_child_w), am_value(right_child_r));
+        printf("\n");
+    }
+
+    am_autoupdate(solver, 1);
+
+    printf("\n\n==========\ntest suggest\n");
+    for (pos = 57; pos < 86; pos++) {
         am_suggest(splitter_bar_l, pos);
         printf("pos: %4g | ", pos);
         printf("splitter_l l=%2g, w=%2g, r=%2g | ", am_value(splitter_l),
@@ -781,8 +799,54 @@ void test_cycling()
     }
 }
 
+void test_set_strength()
+{
+    am_Solver *solver = am_newsolver(NULL, NULL);
+    am_Constraint *c = am_newconstraint(solver, AM_REQUIRED);
+    int ret = am_setstrength(c, AM_REQUIRED);
+    assert(ret == AM_OK);
+
+    ret = am_setstrength(c, 0.0);
+    assert(ret == AM_OK);
+    assert(c->strength == AM_REQUIRED);
+
+    ret = am_setstrength(c, 11000);
+    assert(ret == AM_OK);
+    assert(c->strength == 11000);
+}
+
+void test_null()
+{
+    int ret = 0;
+    am_resetconstraint(NULL);
+    am_deledit(NULL);
+    am_suggest(NULL, 0.0);
+    am_addedit(NULL, 0.0);
+    am_setstrength(NULL, 0.0);
+
+    am_Constraint *c0 = am_cloneconstraint(NULL, 0.0);
+    assert(c0 == NULL);
+
+    ret = am_mergeconstraint(NULL, NULL, 0.0);
+    assert(ret == AM_FAILED);
+
+    am_Solver *solver = am_newsolver(NULL, NULL);
+    am_Constraint *c = am_newconstraint(solver, AM_REQUIRED);
+    ret = am_mergeconstraint(c, NULL, 0.0);
+    assert(ret == AM_FAILED);
+
+    am_Solver *solver2 = am_newsolver(NULL, NULL);
+    am_Constraint *c2 = am_newconstraint(solver2, AM_REQUIRED);
+    assert(c->marker.id == 0);
+    assert(c->solver != c2->solver);
+    ret = am_mergeconstraint(c, c2, 0.0);
+    assert(ret == AM_FAILED);
+}
+
 int main(void)
 {
+    test_null();
+    test_set_strength();
     test_binarytree();
     test_unbounded();
     test_strength();

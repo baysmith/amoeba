@@ -1,10 +1,16 @@
 cc = gcc
+cxx = g++
 exe = .exe
-cflags = -Wall -pedantic
+cflags = -Wall -pedantic -O3
 
 rule cc
-  command = $cc $cflags -c $in -o $out
+  depfile = $out.d
+  command = $cc -MMD -MF $out.d $cflags -c $in -o $out
   description = CC $out
+
+rule cxx
+  command = $cxx -MMD -MF $out.d $cflags -c $in -o $out
+  description = CXX $out
 
 rule link
   command = $cc $linkflags -o $out $in
@@ -19,6 +25,10 @@ rule gcov
 build am_test.o: cc test.c
 build am_test$exe: link am_test.o
 build test: run am_test$exe
+
+build am_test_cxx.o: cxx test.c
+build am_test_cxx$exe: link am_test_cxx.o
+build test_cxx: run am_test_cxx$exe
 
 build am_test_cov.o: cc test.c
   cflags = -Wall -pedantic -fprofile-arcs -ftest-coverage

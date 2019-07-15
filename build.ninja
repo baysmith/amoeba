@@ -1,7 +1,7 @@
 cc = gcc
 cxx = g++
 exe = .exe
-cflags = -Wall -pedantic -O3
+cflags = -std=c99 -Wall -pedantic -O3
 
 rule cc
   depfile = $out.d
@@ -22,6 +22,10 @@ rule run
 rule gcov
   command = gcov $in $args
 
+rule format
+  command = clang-format -i $in
+  description = FORMAT $out
+
 build am_test.o: cc test.c
 build am_test$exe: link am_test.o
 build test: run am_test$exe
@@ -37,5 +41,8 @@ build am_test_cov$exe: link am_test_cov.o
 
 build run_cov_test: run am_test_cov$exe
 build cov: gcov am_test_cov.o | run_cov_test
+
+build format: format test.c amoeba.h expected_binary_tree_values.h $
+  expected_splitter_values.h
 
 default test

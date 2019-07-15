@@ -1,3 +1,5 @@
+#define ENABLE_MEMORY_ASSERT 1
+
 #define AM_IMPLEMENTATION
 #include "amoeba.h"
 
@@ -12,6 +14,12 @@ static jmp_buf jbuf;
 static size_t allmem = 0;
 static size_t maxmem = 0;
 static void *END = NULL;
+
+#if ENABLE_MEMORY_ASSERT
+#define memory_assert(condition) assert(condition)
+#else
+#define memory_assert(condition)
+#endif
 
 static void *debug_allocf(void *ud, void *ptr, size_t ns, size_t os)
 {
@@ -348,8 +356,8 @@ static void test_all()
     assert(am_value(xr) == 100.0);
 
     am_delsolver(solver);
-    assert(maxmem == 11728);
-    assert(allmem == 0);
+    memory_assert(maxmem == 11728);
+    memory_assert(allmem == 0);
     maxmem = 0;
     printf("test_all passed\n");
 }
@@ -456,8 +464,8 @@ static void test_binarytree()
     }
 
     am_delsolver(pSolver);
-    assert(maxmem == 3652176);
-    assert(allmem == 0);
+    memory_assert(maxmem == 3652176);
+    memory_assert(allmem == 0);
     free(arrX);
     maxmem = 0;
     printf("test_binarytree passed\n");
@@ -587,8 +595,8 @@ static void test_unbounded()
     assert(solver->rows.count == 2);
 
     am_delsolver(solver);
-    assert(maxmem == 9680);
-    assert(allmem == 0);
+    memory_assert(maxmem == 9680);
+    memory_assert(allmem == 0);
     maxmem = 0;
     printf("test_unbounded passed\n");
 }
@@ -630,8 +638,8 @@ static void test_strength()
     assert(am_value(y) == 50);
 
     am_delsolver(solver);
-    assert(maxmem == 9616);
-    assert(allmem == 0);
+    memory_assert(maxmem == 9616);
+    memory_assert(allmem == 0);
     maxmem = 0;
     printf("test_strength passed\n");
 }
@@ -642,11 +650,15 @@ static void test_suggest()
 #if 1
     am_Float strength1 = AM_REQUIRED;
     am_Float strength2 = AM_REQUIRED;
+#if ENABLE_MEMORY_ASSERT
     size_t expected_maxmem = 12048;
+#endif
 #else
     am_Float strength1 = AM_STRONG;
     am_Float strength2 = AM_WEAK;
+#if ENABLE_MEMORY_ASSERT
     size_t expected_maxmem = 12112;
+#endif
 #endif
     am_Float delta = 0;
     am_Float pos;
@@ -778,8 +790,8 @@ static void test_suggest()
     }
 
     am_delsolver(solver);
-    assert(allmem == 0);
-    assert(maxmem == expected_maxmem);
+    memory_assert(allmem == 0);
+    memory_assert(maxmem == expected_maxmem);
     maxmem = 0;
     printf("test_suggest passed\n");
 }
@@ -859,8 +871,8 @@ void test_cycling()
     }
 
     am_delsolver(solver);
-    assert(allmem == 0);
-    assert(maxmem == 10320);
+    memory_assert(allmem == 0);
+    memory_assert(maxmem == 10320);
     maxmem = 0;
     printf("test_cycling passed\n");
 }

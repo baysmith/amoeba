@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 static jmp_buf jbuf;
 static size_t allmem = 0;
@@ -914,6 +915,7 @@ void test_null()
 
 int main()
 {
+    clock_t start = clock();
     test_all();
     test_null();
     test_set_strength();
@@ -922,6 +924,12 @@ int main()
     test_binarytree();
     test_strength();
     test_unbounded();
+
+    clock_t end = clock();
+    double elapsed_time = ((double) (end - start)) / CLOCKS_PER_SEC;
+    printf("elapsed time: %g seconds\n", elapsed_time);
+    if (elapsed_time < 0.02 || elapsed_time > 0.042)
+        printf("Warning: expected elapsed time is about 0.03 seconds\n");
 
     (void)am_dumpsolver(NULL);
     return 0;

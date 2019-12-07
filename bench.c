@@ -1,3 +1,5 @@
+#include <benchmark/benchmark.h>
+
 #define ENABLE_MEMORY_ASSERT 0
 
 #define AM_IMPLEMENTATION
@@ -134,7 +136,6 @@ static am_Constraint *new_constraint(am_Solver *in_solver, double in_strength,
 
 static void test_all()
 {
-    printf("test_all...\n");
     am_Solver *solver;
     am_Variable *xl;
     am_Variable *xm;
@@ -361,12 +362,10 @@ static void test_all()
     memory_assert(maxmem == 11728);
     memory_assert(allmem == 0);
     maxmem = 0;
-    printf("test_all passed\n");
 }
 
 static void test_binarytree()
 {
-    printf("test_binarytree...\n");
     /* Create set of rules to distribute vertexes of a binary tree like this
      * one:
      *      0
@@ -470,12 +469,10 @@ static void test_binarytree()
     memory_assert(allmem == 0);
     free(arrX);
     maxmem = 0;
-    printf("test_binarytree passed\n");
 }
 
 static void test_unbounded()
 {
-    printf("test_unbounded...\n");
     am_Solver *solver;
     am_Variable *x, *y;
     am_Constraint *c;
@@ -600,12 +597,10 @@ static void test_unbounded()
     memory_assert(maxmem == 9680);
     memory_assert(allmem == 0);
     maxmem = 0;
-    printf("test_unbounded passed\n");
 }
 
 static void test_strength()
 {
-    printf("test_strength...\n");
     am_Solver *solver;
     am_Variable *x, *y;
     am_Constraint *c;
@@ -643,12 +638,10 @@ static void test_strength()
     memory_assert(maxmem == 9616);
     memory_assert(allmem == 0);
     maxmem = 0;
-    printf("test_strength passed\n");
 }
 
 static void test_suggest()
 {
-    printf("test_suggest...\n");
 #if 1
     am_Float strength1 = AM_REQUIRED;
     am_Float strength2 = AM_REQUIRED;
@@ -795,12 +788,10 @@ static void test_suggest()
     memory_assert(allmem == 0);
     memory_assert(maxmem == expected_maxmem);
     maxmem = 0;
-    printf("test_suggest passed\n");
 }
 
 void test_cycling()
 {
-    printf("test_cycling...\n");
     am_Solver *solver = am_newsolver(debug_allocf, NULL);
 
     am_Variable *va = am_newvariable(solver);
@@ -876,12 +867,10 @@ void test_cycling()
     memory_assert(allmem == 0);
     memory_assert(maxmem == 10320);
     maxmem = 0;
-    printf("test_cycling passed\n");
 }
 
 void test_set_strength()
 {
-    printf("test_set_strength...\n");
     am_Solver *solver = am_newsolver(NULL, NULL);
     am_Constraint *c = am_newconstraint(solver, AM_REQUIRED);
     int ret = am_setstrength(c, AM_REQUIRED);
@@ -894,12 +883,10 @@ void test_set_strength()
     ret = am_setstrength(c, 11000);
     assert(ret == AM_OK);
     assert(c->strength == 11000);
-    printf("test_set_strength passed\n");
 }
 
 void test_null()
 {
-    printf("test_null...\n");
     int ret = 0;
     am_resetconstraint(NULL);
     am_deledit(NULL);
@@ -924,27 +911,63 @@ void test_null()
     assert(c->solver != c2->solver);
     ret = am_mergeconstraint(c, c2, 0.0);
     assert(ret == AM_FAILED);
-    printf("test_null passed\n");
 }
 
-int main()
+static void BM_test_all(benchmark::State &state)
 {
-    clock_t start = clock();
-    test_all();
-    test_null();
-    test_set_strength();
-    test_cycling();
-    test_suggest();
-    test_binarytree();
-    test_strength();
-    test_unbounded();
-
-    clock_t end = clock();
-    double elapsed_time = ((double) (end - start)) / CLOCKS_PER_SEC;
-    printf("elapsed time: %g seconds\n", elapsed_time);
-    if (elapsed_time < 0.02 || elapsed_time > 0.042)
-        printf("Warning: expected elapsed time is about 0.03 seconds\n");
-
-    (void)am_dumpsolver(NULL);
-    return 0;
+    std::string x = "hello";
+    for (auto _ : state)
+        test_all();
 }
+BENCHMARK(BM_test_all);
+
+static void BM_test_null(benchmark::State &state)
+{
+    for (auto _ : state)
+        test_null();
+}
+BENCHMARK(BM_test_null);
+
+static void BM_test_set_strength(benchmark::State &state)
+{
+    for (auto _ : state)
+        test_set_strength();
+}
+BENCHMARK(BM_test_set_strength);
+
+static void BM_test_cycling(benchmark::State &state)
+{
+    for (auto _ : state)
+        test_cycling();
+}
+BENCHMARK(BM_test_cycling);
+
+static void BM_test_suggest(benchmark::State &state)
+{
+    for (auto _ : state)
+        test_suggest();
+}
+BENCHMARK(BM_test_suggest);
+
+static void BM_test_binarytree(benchmark::State &state)
+{
+    for (auto _ : state)
+        test_binarytree();
+}
+BENCHMARK(BM_test_binarytree);
+
+static void BM_test_strength(benchmark::State &state)
+{
+    for (auto _ : state)
+        test_strength();
+}
+BENCHMARK(BM_test_strength);
+
+static void BM_test_unbounded(benchmark::State &state)
+{
+    for (auto _ : state)
+        test_unbounded();
+}
+BENCHMARK(BM_test_unbounded);
+
+BENCHMARK_MAIN();

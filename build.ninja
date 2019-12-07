@@ -2,6 +2,7 @@ cc = gcc
 cxx = g++
 exe = .exe
 cflags = -std=c99 -Wall -pedantic -O3
+linkflags =
 
 rule cc
   depfile = $out.d
@@ -13,7 +14,7 @@ rule cxx
   description = CXX $out
 
 rule link
-  command = $cc $linkflags -o $out $in
+  command = $cxx $linkflags -o $out $in
   description = LINK $out
 
 rule run
@@ -26,23 +27,32 @@ rule format
   command = clang-format -i $in
   description = FORMAT $out
 
+build amoeba.o: cc amoeba.c
+
 build am_test.o: cc test.c
 build am_test$exe: link am_test.o
 build test: run am_test$exe
 
 build am_test_cxx.o: cxx test.c
-build am_test_cxx$exe: link am_test_cxx.o
+build am_test_cxx$exe: link am_test_cxx.o amoeba.o
 build test_cxx: run am_test_cxx$exe
 
+build amoeba_cov.o: cc amoeba.c
+  cflags = -pg -Wall -pedantic -fprofile-arcs -ftest-coverage
 build am_test_cov.o: cc test.c
-  cflags = -Wall -pedantic -fprofile-arcs -ftest-coverage
-build am_test_cov$exe: link am_test_cov.o
-  linkflags = -fprofile-arcs -ftest-coverage
+  cflags = -pg -Wall -pedantic -fprofile-arcs -ftest-coverage
+build am_test_cov$exe: link am_test_cov.o amoeba_cov.o
+  linkflags = -fprofile-arcs -ftest-coverage -pg
 
 build run_cov_test: run am_test_cov$exe
-build cov: gcov am_test_cov.o | run_cov_test
+build cov: gcov am_test_cov.o amoeba_cov.o | run_cov_test
 
 build format: format test.c amoeba.h expected_binary_tree_values.h $
   expected_splitter_values.h
+
+build bench.o: cxx bench.c
+  cflags = -std=c99 -Wall -pedantic -O3 -I../benchmark/include
+build bench$exe: link bench.o amoeba.o
+  linkflags = -Wl,-allow-multiple-definition -L../benchmark/build/src -lbenchmark_main -lbenchmark -lShlwapi
 
 default test

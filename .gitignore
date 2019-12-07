@@ -6,3 +6,6 @@
 *.exe
 
 *.so
+.ninja_*
+*.o
+*.d

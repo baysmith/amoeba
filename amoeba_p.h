@@ -7,16 +7,17 @@
 #include <float.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #define AM_EXTERNAL (0)
 #define AM_SLACK (1)
 #define AM_ERROR (2)
 #define AM_DUMMY (3)
 
-#define am_isexternal(key) ((key).type == AM_EXTERNAL)
-#define am_isslack(key) ((key).type == AM_SLACK)
-#define am_iserror(key) ((key).type == AM_ERROR)
-#define am_isdummy(key) ((key).type == AM_DUMMY)
+#define am_isexternal(key) (am_Symbol_type(key) == AM_EXTERNAL)
+#define am_isslack(key) (am_Symbol_type(key) == AM_SLACK)
+#define am_iserror(key) (am_Symbol_type(key) == AM_ERROR)
+#define am_isdummy(key) (am_Symbol_type(key) == AM_DUMMY)
 #define am_ispivotable(key) (am_isslack(key) || am_iserror(key))
 
 #define AM_POOLSIZE 4096
@@ -34,9 +35,12 @@
 AM_NS_BEGIN
 
 typedef struct am_Symbol {
-    unsigned id : 30;
-    unsigned type : 2;
+    // id first 30 bits, type last 2 bits
+    unsigned id_type;
 } am_Symbol;
+unsigned int am_Symbol_id(am_Symbol sym);
+unsigned int am_Symbol_type(am_Symbol sym);
+void am_Symbol_set(am_Symbol *sym, unsigned id, unsigned type);
 
 typedef struct am_MemPool {
     size_t size;

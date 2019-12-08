@@ -30,7 +30,7 @@ rule format
 build amoeba.o: cc amoeba.c
 
 build am_test.o: cc test.c
-build am_test$exe: link am_test.o
+build am_test$exe: link am_test.o amoeba.o
 build test: run am_test$exe
 
 build am_test_cxx.o: cxx test.c

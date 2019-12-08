@@ -51,7 +51,7 @@ static void *null_allocf(void *ud, void *ptr, size_t ns, size_t os)
 static void am_dumpkey(am_Symbol sym)
 {
     int ch = 'v';
-    switch (sym.type) {
+    switch (am_Symbol_type(sym)) {
     case AM_EXTERNAL:
         ch = 'v';
         break;
@@ -65,7 +65,7 @@ static void am_dumpkey(am_Symbol sym)
         ch = 'd';
         break;
     }
-    printf("%c%d", ch, (int)sym.id);
+    printf("%c%d", ch, (int)am_Symbol_id(sym));
 }
 
 static void am_dumprow(am_Row *row)
@@ -180,7 +180,7 @@ static void test_all()
     assert(am_setrelation(NULL, AM_GREATEQUAL) == AM_FAILED);
 
     c1 = am_newconstraint(solver, AM_REQUIRED);
-    assert(c1->marker.id == 0);
+    assert(am_Symbol_id(c1->marker) == 0);
     am_addterm(c1, xl, 1.0);
     am_setrelation(c1, AM_GREATEQUAL);
     ret = am_add(c1);
@@ -920,7 +920,7 @@ void test_null()
 
     am_Solver *solver2 = am_newsolver(NULL, NULL);
     am_Constraint *c2 = am_newconstraint(solver2, AM_REQUIRED);
-    assert(c->marker.id == 0);
+    assert(am_Symbol_id(c->marker) == 0);
     assert(c->solver != c2->solver);
     ret = am_mergeconstraint(c, c2, 0.0);
     assert(ret == AM_FAILED);
